@@ -1,19 +1,11 @@
-/* jshint esversion: 6 */
 // Enemies our player must avoid
-class Enemy {
-	constructor() {
-		this.sprite = 'images/enemy-bug.png';
-		this.x = 0;
-		this.y = 60;
-	}
-
-
+var Enemy = function() {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    
+    this.sprite = 'images/enemy-bug.png';
 };
 
 // Update the enemy's position, required method for game
@@ -36,16 +28,8 @@ Enemy.prototype.render = function() {
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
-var allEnemies = [];
-var enemy1 = new Enemy();
-allEnemies.push(enemy1);
 // Place the player object in a variable called player
-var player = new Enemy();
-player.sprite = 'images/char-boy.png'
-player.x = 200;
-player.y = 150;
-//player.render();
-//console.log(ctx);
+
 
 
 // This listens for key presses and sends the keys to your
