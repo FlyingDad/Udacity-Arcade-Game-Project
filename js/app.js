@@ -1,10 +1,59 @@
 /* jshint esversion: 6 */
-// Enemies our player must avoid
-class Enemy {
+// Grid is a 7 x 6 grid, with cols 0 and 7 offscreen
+// Sets default to grid 0, 0 (upper left offscreen)
+var xHome = -101;
+var yHome = -101;
+
+//Offets to center sprites
+var xOffset = 101;
+var yOffset = 83;
+
+class Character {
 	constructor() {
+		this.x = 1;
+		this.y = 1;
+	}
+
+	update() {
+		//console.log('update');
+	}
+	render(){
+		//console.log('render');
+	}
+}
+class Enemy extends Character {
+	constructor() {
+		super();
 		this.sprite = 'images/enemy-bug.png';
-		this.x = 0;
-		this.y = 60;
+	}
+}
+
+class Player extends Character {
+	constructor() {
+		super();
+		this.x = 3;
+		this.y = 6;
+		this.sprite = 'images/char-boy.png';
+	}
+
+	handleInput(key) {
+		console.log(key);
+		switch (key){
+			case 'up':
+				this.y--;
+				break;
+			case 'down':
+				this.y++;
+				break;
+			case 'left':
+				this.x--;
+				break;
+			case 'right':
+				this.x++;
+				break;
+			default:
+				break;
+		}
 	}
 
 
@@ -14,19 +63,19 @@ class Enemy {
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     
-};
+}
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
-Enemy.prototype.update = function(dt) {
+Character.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
 };
 
 // Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+Character.prototype.render = function() {
+		ctx.drawImage(Resources.get(this.sprite), xHome + (this.x * xOffset) , yHome + (this.y * yOffset));
 };
 
 // Now write your own player class
@@ -40,12 +89,8 @@ var allEnemies = [];
 var enemy1 = new Enemy();
 allEnemies.push(enemy1);
 // Place the player object in a variable called player
-var player = new Enemy();
-player.sprite = 'images/char-boy.png'
-player.x = 200;
-player.y = 150;
-//player.render();
-//console.log(ctx);
+var player = new Player();
+console.table(player);
 
 
 // This listens for key presses and sends the keys to your
