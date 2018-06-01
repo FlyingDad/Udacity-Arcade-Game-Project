@@ -11,20 +11,28 @@ var yOffset = 83;
 class Character {
 	constructor() {
 		this.x = 1;
-		this.y = 1;
+		this.y = 2;
 	}
 
-	update() {
-		//console.log('update');
-	}
+	
 	render(){
-		//console.log('render');
+	}
+
+	// called by game engine for smooth movement adjusted for deltatime.
+	update(){	
 	}
 }
 class Enemy extends Character {
 	constructor() {
 		super();
 		this.sprite = 'images/enemy-bug.png';
+		this.defaultSpeed = 0.02;
+	}
+	
+	// Update the enemy's position, required method for game
+	// Parameter: dt, a time delta between ticks
+	update(speed = defaultSpeed) {
+		this.x += speed;
 	}
 }
 
@@ -33,6 +41,10 @@ class Player extends Character {
 		super();
 		this.x = 3;
 		this.y = 6;
+		this.maxX = 5;
+		this.minX = 1;
+		this.maxY = 6;
+		this.minY = 1;
 		this.sprite = 'images/char-boy.png';
 	}
 
@@ -40,22 +52,23 @@ class Player extends Character {
 		console.log(key);
 		switch (key){
 			case 'up':
-				this.y--;
+			// comparisons keep player on grid by limiting them to min/max coords
+			// if position is == max position dont move, else move
+				this.y == this.minY ? this.minY : this.y--;
 				break;
 			case 'down':
-				this.y++;
+				this.y == this.maxY ? this.maxY : this.y++;
 				break;
 			case 'left':
-				this.x--;
+				this.x == this.minX ? this.minX :  this.x--;
 				break;
 			case 'right':
-				this.x++;
+			 this.x == this.maxX ? this.maxX :  this.x++;
 				break;
 			default:
 				break;
 		}
 	}
-
 
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
@@ -67,11 +80,12 @@ class Player extends Character {
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
-Character.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-};
+// Enemy.prototype.update = function(dt) {
+//     // You should multiply any movement by the dt parameter
+//     // which will ensure the game runs at the same speed for
+// 		// all computers.
+// 		//this.x += .01;
+// };
 
 // Draw the enemy on the screen, required method for game
 Character.prototype.render = function() {
@@ -90,7 +104,7 @@ var enemy1 = new Enemy();
 allEnemies.push(enemy1);
 // Place the player object in a variable called player
 var player = new Player();
-console.table(player);
+//console.table(player);
 
 
 // This listens for key presses and sends the keys to your
