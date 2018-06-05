@@ -31,12 +31,27 @@ class Enemy extends Character {
 	// Update the enemy's position, required method for game
 	// Parameter: dt, a time delta between ticks
 	update(speed = defaultSpeed) {
-		this.x += speed + this.speedMultiplier;
-		//console.log(this.x);
-		if(this.x > 8){
-			this.x = -1;
-		}
-	}
+    if(!this.checkForCollision()){
+	  	this.x += speed + this.speedMultiplier;
+		  //console.log(this.x);
+		  if(this.x > 8){
+			  this.x = -1;
+      }
+    } else {
+      speed = 0;
+    }
+  }
+
+  checkForCollision(){
+    // Suntract 0.2 from player x pos. Collisions will occur 20% into grid square to make them more realistic
+    let playerPos = [player.x - 0.2, player.y];
+    if(this.x >= playerPos[0] && this.y == playerPos[1]){
+      // collision
+      return true;
+    }
+    return false;
+  }
+
 }
 
 class Player extends Character {
@@ -103,12 +118,14 @@ Character.prototype.render = function () {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 var allEnemies = [];
-var enemy1 = new Enemy(generateRandomEnemyStartX(), generateRandomEnemySpeed());
-var enemy2 = new Enemy(generateRandomEnemyStartX(), generateRandomEnemySpeed());
+//var enemy1 = new Enemy(2, generateRandomEnemySpeed());
+//var enemy2 = new Enemy(3, generateRandomEnemySpeed());
+var enemy3 = new Enemy(4, generateRandomEnemySpeed());
 //console.table(enemy1);
 //console.table(enemy2);
-allEnemies.push(enemy1);
-allEnemies.push(enemy2);
+//allEnemies.push(enemy1);
+//allEnemies.push(enemy2);
+allEnemies.push(enemy3);
 // Place the player object in a variable called player
 var player = new Player();
 //console.table(player);
