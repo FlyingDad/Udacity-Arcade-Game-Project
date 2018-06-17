@@ -22,4 +22,15 @@ body {
   box-shadow: 3px 3px 3px rgb(105, 105, 105);
 }
 
+/* .player-died {
+  animation: roll 3s;
+}
 
+@keyframes roll {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} */
