@@ -1,4 +1,11 @@
 /* jshint esversion: 6 */
+let score = 123;
+let scoreText = document.getElementById('score');
+let lives = 45;
+let livesText = document.getElementById('lives');
+
+initGame();
+
 // Grid is a 7 x 6 grid, with cols 0 and 7 offscreen
 // Sets default to grid 0, 0 (upper left offscreen)
 var xHome = -101;
@@ -31,7 +38,7 @@ class Enemy extends Character {
 	// Update the enemy's position, required method for game
 	// Parameter: dt, a time delta between ticks
 	update(speed = defaultSpeed) {
-    if(!this.checkForCollision()){
+    if(!this.checkForCollision(this)){
 	  	this.x += speed + this.speedMultiplier;
 		  //console.log(this.x);
 		  if(this.x > 8){
@@ -42,16 +49,22 @@ class Enemy extends Character {
     }
   }
 
-  checkForCollision(){
+  checkForCollision(enemy){
     // Suntract 0.2 from player x pos. Collisions will occur 20% into grid square to make them more realistic
-    let playerPos = [player.x - 0.2, player.y];
-    if(this.x >= playerPos[0] && this.y == playerPos[1]){
+    let playerPos = [player.x - 0.4, player.y];
+    if(enemy.x >= playerPos[0] && enemy.x < (playerPos[0] + 0.8) && enemy.y == playerPos[1]){
       // collision
+      handleCollision();
+      //debugger
       return true;
     }
     return false;
   }
+}
 
+function handleCollision(){
+  lives--;
+  livesText.innerHTML = lives;
 }
 
 class Player extends Character {
@@ -152,3 +165,8 @@ document.addEventListener('keyup', function (e) {
 
 	player.handleInput(allowedKeys[e.keyCode]);
 });
+
+function initGame(){
+  livesText.innerHTML = 3;
+  scoreText.innerText = 0;
+}
