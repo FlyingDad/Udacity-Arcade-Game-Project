@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
-let score = 123;
+let score = 0;
 let scoreText = document.getElementById('score');
-let lives = 45;
+let lives = 1;
 let livesText = document.getElementById('lives');
 let gameIsRunning = true;
 let playerCollision = false;
@@ -25,7 +25,8 @@ class Character {
   render() {}
 
   // called by game engine for smooth movement adjusted for deltatime.
-  update() {}
+  update() {
+  }
 }
 class Enemy extends Character {
   constructor(yPos, speedMultiplier) {
@@ -36,13 +37,13 @@ class Enemy extends Character {
     this.defaultSpeed = 0.01;
   }
 
+
   // Update the enemy's position, required method for game
   // Parameter: dt, a time delta between ticks
   update(speed = defaultSpeed) {
     if (gameIsRunning) {
       if (!this.checkForCollision(this)) {
         this.x += speed + this.speedMultiplier;
-        //console.log(this.x);
         if (this.x > 8) {
           this.x = -1;
         }
@@ -77,9 +78,30 @@ class Player extends Character {
     this.sprite = 'images/char-boy.png';
   }
 
+  reset(){
+    this.x = 3;
+    this.y = 6;
+  }
+
+  update(){
+    if(lives === 0){
+      gameOver();
+    }
+    if(this.y === 1 && gameIsRunning){
+      gameIsRunning = false;
+      score += 10;
+      scoreText.innerHTML = score;
+      let self = this;
+      setTimeout(function(){
+        self.reset();
+        gameIsRunning = true;
+      }, 1000);
+      
+    }
+  }
+
   handleInput(key) {
-    console.log(key);
-    if (!playerCollision) {
+    if (!playerCollision && gameIsRunning) {
       switch (key) {
         case 'up':
           // comparisons keep player on grid by limiting them to min/max coords
@@ -100,13 +122,6 @@ class Player extends Character {
       }
     }
   }
-
-  // Variables applied to each of our instances go here,
-  // we've provided one for you to get started
-
-  // The image/sprite for our enemies, this uses
-  // a helper we've provided to easily load images
-
 }
 
 class Gem extends Character {
@@ -126,60 +141,71 @@ class Heart extends Character {
     super();
     this.x = 2;
     this.y = 3;
-    // this.maxX = 5;
-    // this.minX = 1;
-    // this.maxY = 6;
-    // this.minY = 1;
     this.sprite = 'images/Heart.png';
   }
 }
+
+class GameOver extends Character {
+  constructor() {
+    super();
+    this.x = 1.5;
+    this.y = 3.5
+    this.active = false;
+    this.sprite = 'images/gameover.png';
+  }
+
+  handleInput(key) {
+    if (!gameIsRunning) {
+      switch (key) {
+        case 'yes':
+          console.log('yes');
+          // TODO: reset game
+          break;
+        case 'no':
+          console.log('no');
+          break;
+        default:
+          break;
+      }
+    }
+  }
+}
+
 
 function handleCollision() {
   gameIsRunning = false; // stops updates
   playerCollision = true;
   lives--;
   livesText.innerHTML = lives;
+  setTimeout(function(){
+    player.reset();
+    gameIsRunning = true;
+    playerCollision = false;
+  },2000);
 }
-
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
-// Enemy.prototype.update = function(dt) {
-//     // You should multiply any movement by the dt parameter
-//     // which will ensure the game runs at the same speed for
-// 		// all computers.
-// 		//this.x += .01;
-// };
 
 // Draw the enemy on the screen, required method for game
 Character.prototype.render = function () {
   ctx.drawImage(Resources.get(this.sprite), xHome + (this.x * xOffset), yHome + (this.y * yOffset));
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
-
-
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
 var allEnemies = [];
 //var enemy1 = new Enemy(2, generateRandomEnemySpeed());
 //var enemy2 = new Enemy(3, generateRandomEnemySpeed());
 var enemy3 = new Enemy(4, generateRandomEnemySpeed());
-//console.table(enemy1);
-//console.table(enemy2);
 //allEnemies.push(enemy1);
 //allEnemies.push(enemy2);
 allEnemies.push(enemy3);
 // Place the player object in a variable called player
 var player = new Player();
-//console.table(player);
 var gems = [];
 var gem = new Gem();
 gems.push(gem);
 var hearts = [];
 var heart = new Heart();
 hearts.push(heart);
+
+let gameOverModal = new GameOver();
 
 function generateRandomEnemyStartX() {
   // get random row between 2 and 4
@@ -198,13 +224,21 @@ document.addEventListener('keyup', function (e) {
     37: 'left',
     38: 'up',
     39: 'right',
-    40: 'down'
+    40: 'down',
+    89: 'yes',
+    78: 'no'
   };
 
   player.handleInput(allowedKeys[e.keyCode]);
+  gameOverModal.handleInput(allowedKeys[e.keyCode]);
 });
 
 function initGame() {
-  livesText.innerHTML = 3;
+  livesText.innerHTML = lives;
   scoreText.innerText = 0;
+}
+
+function gameOver(){
+  gameIsRunning = false;
+  gameOverModal.active = true;
 }

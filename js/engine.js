@@ -161,6 +161,10 @@ var Engine = (function(global) {
         });
 
         player.render();
+        if(gameOverModal.active){
+        
+          gameOverModal.render();
+        }
     }
 
     /* This function does nothing but it could have been a good place to
@@ -184,7 +188,8 @@ var Engine = (function(global) {
         'images/Heart.png',
         'images/gem-blue.png',
         'images/gem-orange.png',
-        'images/gem-green.png', 
+        'images/gem-green.png',
+        'images/gameover.png'
     ]);
     Resources.onReady(init);
 
