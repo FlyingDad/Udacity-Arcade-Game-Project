@@ -27,6 +27,13 @@ class GameObject {
   constructor() {
     this.x = 0;
     this.y = 2;
+    this.sound = '';
+  }
+
+  playSound() {
+    var audio = new Audio(this.sound);
+    audio.loop = false;
+    audio.play();
   }
 
   render() {}
@@ -48,6 +55,7 @@ class Enemy extends GameObject {
     this.speedMultiplier = speedMultiplier;
     this.sprite = 'images/enemy-bug.png';
     this.defaultSpeed = 0.01;
+    this.sound = '../sounds/bite.wav'
   }
 
 
@@ -76,7 +84,7 @@ class Enemy extends GameObject {
     if (this.x >= playerPos[0] && this.x < (playerPos[0] + 0.8) && this.y == playerPos[1]) {
       // collision
       handlePlayerCollision();
-      //debugger
+      this.playSound();
       return true;
     }
     return false;
@@ -93,6 +101,7 @@ class Player extends GameObject {
     this.maxY = 6;
     this.minY = 1;
     this.sprite = 'images/char-boy.png';
+    this.sound = '../sounds/move.wav';
   }
 
   reset(){
@@ -127,6 +136,7 @@ class Player extends GameObject {
           // comparisons keep player on grid by limiting them to min/max coords
           // if position is == max position dont move, else move
           this.y == this.minY ? this.minY : this.y--;
+          this.playSound();
           break;
         case 'down':
           if(this.y == 4 && playerInBugZone) {
@@ -136,13 +146,16 @@ class Player extends GameObject {
             if(this.y >= 4 && !playerInBugZone){
               playerInBugZone = true;
             }
+            this.playSound();
             break;
           }
         case 'left':
           this.x == this.minX ? this.minX : this.x--;
+          this.playSound();
           break;
         case 'right':
           this.x == this.maxX ? this.maxX : this.x++;
+          this.playSound();
           break;
         default:
           break;
@@ -160,6 +173,7 @@ class Gem extends GameObject {
     this.orange =  'images/gem-orange.png';
     this.green =  'images/gem-green.png';
     this.sprite = this.green;
+    this.sound = '../sounds/gem.wav'
   }
   update() {
     this.checkForCollision();
@@ -170,6 +184,7 @@ class Gem extends GameObject {
     let playerPos = [player.x - 0.4, player.y];
     if (this.x >= playerPos[0] && this.x < (playerPos[0] + 0.8) && this.y == playerPos[1]) {
       handleGemCollision();
+      this.playSound();
     }
   }
 }
@@ -180,6 +195,7 @@ class Heart extends GameObject {
     this.x = x;
     this.y = y;
     this.sprite = 'images/Heart.png';
+    this.sound = '../sounds/heart.wav';
   }
 
   update() {
@@ -191,6 +207,7 @@ class Heart extends GameObject {
     let playerPos = [player.x - 0.4, player.y];
     if (this.x >= playerPos[0] && this.x < (playerPos[0] + 0.8) && this.y == playerPos[1]) {
       handleHeartCollision();
+      this.playSound();
     }
   }
 }
@@ -334,7 +351,7 @@ function resetPlayer(){
 // generate a life heart every 10 seconds
 function createHeart() {
   heart = setTimeout(() => {
-    if(hearts.length < 1){
+    if(hearts.length < 10){
       let x = Math.floor(Math.random() * 5) + 1;
       let y = Math.floor(Math.random() * 3) + 2;
       let heart = new Heart(x, y);
@@ -346,14 +363,15 @@ function createHeart() {
 // generate a life heart every 5 seconds
 function createGem() {
   let gem = setTimeout(() => {
-    if(gems.length < 1){
+    if(gems.length < 10){
       let x = Math.floor(Math.random() * 5) + 1;
       let y = Math.floor(Math.random() * 3) + 2;
       let gem = new Gem(x, y);
       gems.push(gem);
     }
-  }, 5000);
+  }, 500);
 }
+
 
 // Game logic -----------------------------------------
 

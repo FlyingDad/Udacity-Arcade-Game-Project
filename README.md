@@ -16,6 +16,8 @@ Browser capable of running ECMAScript 6 (ES6)
 JavaScript Classes: [JavaScript Classes MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
 JavaScript Class Extensions: [JavaScript Class Extends MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/extends)
 
+[RPG Sound Pack](https://opengameart.org/content/rpg-sound-pack) by Artistic Dude
+
 ## Contributing
 
 > To get started...
