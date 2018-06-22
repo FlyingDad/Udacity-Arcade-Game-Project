@@ -2,26 +2,35 @@
 const startingLives = 3;
 let score = 0;
 let scoreText = document.getElementById('score');
-let lives = 1;
+let lives = 3;
 let livesText = document.getElementById('lives');
 let gameIsRunning = true;
 let playerCollision = false;
 let heart;
 let gem;
+let gemCount = 0;
+let maxGems = 1;
+let heartCount = 0;
+let maxHearts =1; 
+// If we decide to increase enemies with difficulty global is here
+let maxEnemies = 5; 
 // used to start heart and gem timers
 let firstMove = false;
+// only allowed one bonus per play
+let heartReceived = false;
+let gemReceived = false;
 // player in the bug zone? LOL He won't be able to return to the grass.
 let playerInBugZone = false;
 initGame();
 
 // Grid is a 7 x 6 grid, with cols 0 and 7 offscreen
 // Sets default to grid 0, 0 (upper left offscreen)
-var xHome = -101;
-var yHome = -101;
+let xHome = -101;
+let yHome = -101;
 
 //Offets to center sprites
-var xOffset = 101;
-var yOffset = 83;
+let xOffset = 101;
+let yOffset = 83;
 
 class GameObject {
   constructor() {
@@ -66,8 +75,7 @@ class Enemy extends GameObject {
       if (!this.checkForCollision(this)) {
         this.x += speed + this.speedMultiplier;
         if (this.x > 8) {
-          //
-          let newLocation = resetPlayer();
+          let newLocation = resetEnemy();
           this.x = newLocation[0];
           this.y = newLocation[1];
           this.speedMultiplier = newLocation[2];
@@ -83,7 +91,7 @@ class Enemy extends GameObject {
     let playerPos = [player.x - 0.4, player.y];
     if (this.x >= playerPos[0] && this.x < (playerPos[0] + 0.8) && this.y == playerPos[1]) {
       // collision
-      handlePlayerCollision();
+      handlePlayerEnemyCollision();
       this.playSound();
       return true;
     }
@@ -107,6 +115,12 @@ class Player extends GameObject {
   reset(){
     this.x = 3;
     this.y = 6;
+    clearTimeout(heart);
+    clearTimeout(gem);
+    gemCount = 0;
+    heartCount = 0;
+    hearts = [];
+    gems = [];
   }
 
   update(){
@@ -114,6 +128,9 @@ class Player extends GameObject {
       gameOver();
     }
     if(this.y === 1 && gameIsRunning){
+      var audio = new Audio('../sounds/win.wav');
+      audio.loop = false;
+      audio.play();
       gameIsRunning = false;
       score += 10;
       scoreText.innerHTML = score;
@@ -130,9 +147,10 @@ class Player extends GameObject {
     if (!playerCollision && gameIsRunning) {
       switch (key) {
         case 'up':
-          // if first move in game start gem and heart timers
-          createHeart();
-          createGem();
+          // if first move in game start gem and heart timers if
+          // they haven't already got one
+          if(!gemReceived)createHeart();
+          if(!heartReceived) createGem();
           // comparisons keep player on grid by limiting them to min/max coords
           // if position is == max position dont move, else move
           this.y == this.minY ? this.minY : this.y--;
@@ -238,12 +256,15 @@ class GameOver extends GameObject {
 
 // Game Functions -----------------------------------------
 
-function handlePlayerCollision() {
+function handlePlayerEnemyCollision() {
   gameIsRunning = false; // stops updates
   playerCollision = true;
   lives--;
   livesText.innerHTML = lives;
   hearts = [];
+  gem = [];
+  clearTimeout(heart);
+  clearTimeout(gem);
   setTimeout(function(){
     player.reset();
     gameIsRunning = true;
@@ -254,26 +275,32 @@ function handlePlayerCollision() {
 function handleHeartCollision() {
   lives++;
   livesText.innerHTML = lives;
+  //clearTimeout(heart);
   // clear hearts array
   hearts = [];
-  createHeart();
+  heartReceived = true;
+  //createHeart();
 }
 
 function handleGemCollision() {
   score += 30;
   scoreText.innerHTML = score;
+  //clearTimeout(gem);
   // clear gems array
   gems = [];
-  createGem();
+  gemReceived = true;
+  //createGem();
 }
-
-
 
 function generateRandomEnemyStartY() {
   // get random row between 2 and 4
   return Math.floor(Math.random() * 3) + 2;
 }
 
+function generateRandomEnemyStartX() {
+  // get random row between 2 and 4
+  return Math.floor(Math.random() * -3);
+}
 // TODO:  add parameter for difficulty
 function generateRandomEnemySpeed() {
   return Math.random() * .03;
@@ -317,6 +344,8 @@ function resetGame(){
   // also clear out hearts and gems that didn'y activate
   clearTimeout(heart);
   clearTimeout(gem);
+  gemCount = 0;
+  heartCount = 0;
   playerInBugZone = false;
   initGame();
   allEnemies = [];
@@ -331,45 +360,44 @@ function resetGame(){
 // Generate enemy every X seconds
 function enemyGenerator() { 
   setInterval(() => {
-    if(allEnemies.length < 3){
-      let enemy = new Enemy(generateRandomEnemyStartY(), generateRandomEnemySpeed());
+    if(allEnemies.length < maxEnemies){
+      let enemy = new Enemy(generateRandomEnemyStartX(),generateRandomEnemyStartY(), generateRandomEnemySpeed());
       allEnemies.push(enemy);
     }
   }, 1000);
 }
 
 // reset to random row and -x location
-function resetPlayer(){
+function resetEnemy(){
   let x = Math.floor(Math.random() * -3);
-  return [x, generateRandomEnemyStartY(), generateRandomEnemySpeed()];
-  // also clear out hearts and gems that didn'y activate
-  clearTimeout(heart);
-  clearTimeout(gem);
   playerInBugZone = false;
+  return [x, generateRandomEnemyStartY(), generateRandomEnemySpeed()];
 }
 
 // generate a life heart every 10 seconds
 function createHeart() {
-  heart = setTimeout(() => {
-    if(hearts.length < 10){
+  if(heartCount < maxHearts){
+    heartCount++;
+    heart = setTimeout(() => {
       let x = Math.floor(Math.random() * 5) + 1;
       let y = Math.floor(Math.random() * 3) + 2;
       let heart = new Heart(x, y);
       hearts.push(heart);
-    }
-  }, 10000);
+    }, 10000);
+  }
 }
 
 // generate a life heart every 5 seconds
-function createGem() {
-  let gem = setTimeout(() => {
-    if(gems.length < 10){
+function createGem() {  
+  if(gemCount < maxGems){
+    gemCount++;
+    gem = setTimeout(() => { 
       let x = Math.floor(Math.random() * 5) + 1;
       let y = Math.floor(Math.random() * 3) + 2;
       let gem = new Gem(x, y);
       gems.push(gem);
-    }
-  }, 500);
+    }, 3000);
+  }
 }
 
 
