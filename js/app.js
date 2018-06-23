@@ -66,7 +66,7 @@ class Enemy extends GameObject {
     this.images = ['images/enemy-bug.png', 'images/enemy-bug-green.png'];
     this.sprite =  speedMultiplier > .02 ? this.images[1] : this.images[0];
     this.defaultSpeed = 0.01;
-    this.sound = '../sounds/bite.wav'
+    this.sound = './sounds/bite.wav'
   }
 
   // when enemy is recycled set new image based on speed;
@@ -117,7 +117,7 @@ class Player extends GameObject {
     this.maxY = 6;
     this.minY = 1;
     this.sprite = 'images/char-boy.png';
-    this.sound = '../sounds/move.wav';
+    this.sound = './sounds/move.wav';
   }
 
   reset(){
@@ -136,7 +136,7 @@ class Player extends GameObject {
       gameOver();
     }
     if(this.y === 1 && gameIsRunning){
-      var audio = new Audio('../sounds/win.wav');
+      var audio = new Audio('./sounds/win.wav');
       audio.loop = false;
       audio.play();
       gameIsRunning = false;
@@ -154,7 +154,6 @@ class Player extends GameObject {
 
   handleInput(key) {
     if (!playerCollision && gameIsRunning) {
-      console.log(playerInBugZone);
       switch (key) {
         case 'up':
           // if first move in game start gem and heart timers if
@@ -202,7 +201,7 @@ class Gem extends GameObject {
     this.orange =  'images/gem-orange.png';
     this.green =  'images/gem-green.png';
     this.sprite = this.green;
-    this.sound = '../sounds/gem.wav'
+    this.sound = './sounds/gem.wav'
   }
   update() {
     this.checkForCollision();
@@ -224,7 +223,7 @@ class Heart extends GameObject {
     this.x = x;
     this.y = y;
     this.sprite = 'images/Heart.png';
-    this.sound = '../sounds/heart.wav';
+    this.sound = './sounds/heart.wav';
   }
 
   update() {
@@ -257,6 +256,10 @@ class GameOver extends GameObject {
           resetGame();
           break;
         case 'no':
+          let cv = document.querySelector('canvas');
+          cv.parentNode.removeChild(cv);
+          let thanks = document.getElementById('thanks');
+          thanks.classList.remove('thanks');
           break;
         default:
           break;

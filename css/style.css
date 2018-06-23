@@ -50,4 +50,18 @@ body {
   width: 50%;
 }
 
+#thanks {
+  width: 505px;
+  height: 100px;
+  margin: 50px auto;
+  padding-top: 25px;
+  border: 2px solid rgb(22, 2, 112);
+  border-radius: 5px;
+  background-color: rgb(101, 206, 110);
+}
+
+.thanks {
+  display: none;
+}
+
 
