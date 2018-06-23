@@ -6,21 +6,28 @@ This is a Udacity Front End Dev Nanodegree project.
 
 * [Requirements](#requirements)
 * [Dependencies](#dependencies)
+* [Directions](#directions)
 * [Contributing](#contributing)
 
 ## Requirements
 Browser capable of running ECMAScript 6 (ES6)
 
 ## Dependencies  
+- Google Font [Bangers](https://fonts.googleapis.com/css?family=Bangers) 
+- JavaScript Classes: [JavaScript Classes MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
+- JavaScript Class Extensions: [JavaScript Class Extends MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/extends)
+- [RPG Sound Pack](https://opengameart.org/content/rpg-sound-pack) by Artistic Dude
 
-JavaScript Classes: [JavaScript Classes MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
-JavaScript Class Extensions: [JavaScript Class Extends MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/extends)
+## Directions
 
-[RPG Sound Pack](https://opengameart.org/content/rpg-sound-pack) by Artistic Dude
+- Use arrow keys to get the boy to the water without hitting a bug
+- Random gems will appear to boost score
+- Random hearts will appear to increase lives
+- Once on the bricks, you can't return to the grass!
 
 ## Contributing
 
-> To get started...
+To get started...
 
 #### Step 1
 
@@ -28,7 +35,7 @@ JavaScript Class Extensions: [JavaScript Class Extends MDN](https://developer.mo
     - 🍴 Fork this repo!
 
 - *Option 2*
-    - 👯 Clone this repo to your local machine using `https://github.com/FlyingDad/Memory-Game-Project.git`
+    - 👯 Clone this repo to your local machine using `https://github.com/FlyingDad/Arcade-Game-Project.git`
 
 #### Step 2
 
