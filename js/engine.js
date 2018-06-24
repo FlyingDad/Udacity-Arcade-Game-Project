@@ -172,9 +172,11 @@ var Engine = (function(global) {
         });
 
         player.render();
-        if(gameOverModal.active){
-        
+        if(gameOverModal.active){     
           gameOverModal.render();
+        }
+        if(instructionsModal.active){     
+          instructionsModal.render();
         }
     }
 
@@ -201,7 +203,8 @@ var Engine = (function(global) {
         'images/gem-blue.png',
         'images/gem-orange.png',
         'images/gem-green.png',
-        'images/gameover.png'
+        'images/gameover.png',
+        'images/instructions.png'
     ]);
     Resources.onReady(init);
 

@@ -1,28 +1,21 @@
 /* jshint esversion: 6 */
 /* jshint browser: true */
-
-const StartingLives = 3;
+const STARTINGLIVES = 3;
+const MAXGEMS = 1;
+const MAXHEARTS =1; 
+// If we decide to increase enemies with difficulty in later versions
+const MAXENEMIES = 5; 
 let score = 0;
 let scoreText = document.getElementById('score');
 let lives = 3;
 let livesText = document.getElementById('lives');
-let gameIsRunning = true;
+let gameIsRunning = false;
 let playerCollision = false;
 let heart;
 let gem;
-let gemCount = 0;
-let maxGems = 1;
-let heartCount = 0;
-let maxHearts =1; 
-// If we decide to increase enemies with difficulty global is here
-let maxEnemies = 5; 
-// used to start heart and gem timers
-let firstMove = false;
-// only allowed one bonus per play
-// let player.heartReceived = false;
-// let player.gemReceived = false;
-// // player in the bug zone? LOL He won't be able to return to the grass.
-// let player.playerInBugZone = false;
+
+
+
 initGame();
 
 // Grid is a 7 x 6 grid, with cols 0 and 7 offscreen
@@ -65,7 +58,6 @@ class Enemy extends GameObject {
 
   // when enemy is recycled set new image based on speed;
   setImage(){
-    console.log(this.speedMultiplier);
     this.sprite = (this.speedMultiplier > 2) ? this.images[1] : this.images[0];
   }
 
@@ -141,10 +133,13 @@ class Player extends GameObject {
     this.minY = 1;
     this.sprite = 'images/char-boy.png';
     this.sound = './sounds/move.wav';
+    // only allowed one bonus per play
     this.heartReceived = false;
     this.gemReceived = false;
     // player in the bug zone? He won't be able to return to the grass.
     this.playerInBugZone = false;
+    this.gemCount = 0;
+    this.heartCount = 0;
   }
 
   reset(){
@@ -152,8 +147,8 @@ class Player extends GameObject {
     this.y = 6;
     clearTimeout(heart);
     clearTimeout(gem);
-    gemCount = 0;
-    heartCount = 0;
+    this.gemCount = 0;
+    this.heartCount = 0;
     hearts = [];
     gems = [];
   }
@@ -312,21 +307,23 @@ class GameOver extends GameObject {
   }
 }
 
-// Game Functions -----------------------------------------
+class Instructions extends GameObject {
+  constructor() {
+    super();
+    this.x = 1;
+    this.y = 2.3
+    ;
+    this.active = false;
+    this.sprite = 'images/instructions.png';
+  }
 
-// function generateRandomEnemyStartY() {
-//   // get random row between 2 and 4
-//   return Math.floor(Math.random() * 3) + 2;
-// }
-
-// function generateRandomEnemyStartX() {
-//   // get random row between 2 and 4
-//   return Math.floor(Math.random() * -3);
-// }
-// TODO:  add parameter for difficulty
-// function generateRandomEnemySpeed() {
-//   return Math.random() * 0.04;
-// }
+  handleInput(key) {
+    if (!gameIsRunning) {
+      this.active = false;
+      gameIsRunning = true;
+    }
+  }
+}
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
@@ -342,6 +339,7 @@ document.addEventListener('keyup', function (e) {
 
   player.handleInput(allowedKeys[e.keyCode]);
   gameOverModal.handleInput(allowedKeys[e.keyCode]);
+  instructionsModal.handleInput();
 });
 
 function initGame() {
@@ -357,18 +355,17 @@ function gameOver(){
 
 function resetGame(){
   //TODO: reset enemies
-  lives = StartingLives;
+  lives = STARTINGLIVES;
   // also clear out hearts and gems that didn'y activate
   clearTimeout(heart);
   clearTimeout(gem);
-  gemCount = 0;
-  heartCount = 0;
+  player.gemCount = 0;
+  player.heartCount = 0;
   player.playerInBugZone = false;
   initGame();
   allEnemies = [];
   gems = [];
   hearts = [];
-  //let player = new Player();
   gameOverModal.active = false;
   gameIsRunning = true;
   enemyGenerator();
@@ -377,7 +374,7 @@ function resetGame(){
 // Generate enemy every X seconds
 function enemyGenerator() { 
   setInterval(() => {
-    if(allEnemies.length < maxEnemies){
+    if(allEnemies.length < MAXENEMIES){
       let enemy = new Enemy();
       allEnemies.push(enemy);
     }
@@ -386,8 +383,8 @@ function enemyGenerator() {
 
 // generate a life heart every 10 seconds
 function createHeart() {
-  if(heartCount < maxHearts){
-    heartCount++;
+  if(player.heartCount < MAXHEARTS){
+    player.heartCount++;
     heart = setTimeout(() => {
       let x = Math.floor(Math.random() * 5) + 1;
       let y = Math.floor(Math.random() * 3) + 2;
@@ -399,8 +396,8 @@ function createHeart() {
 
 // generate a life heart every 5 seconds
 function createGem() {  
-  if(gemCount < maxGems){
-    gemCount++;
+  if(player.gemCount < MAXGEMS){
+    player.gemCount++;
     gem = setTimeout(() => { 
       let x = Math.floor(Math.random() * 5) + 1;
       let y = Math.floor(Math.random() * 3) + 2;
@@ -413,6 +410,8 @@ function createGem() {
 
 // Game logic -----------------------------------------
 
+let instructionsModal = new Instructions();
+instructionsModal.active = true;
 let allEnemies = [];
 let gems = [];
 let hearts = [];
