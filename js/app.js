@@ -1,5 +1,7 @@
 /* jshint esversion: 6 */
-const startingLives = 3;
+/* jshint browser: true */
+
+const StartingLives = 3;
 let score = 0;
 let scoreText = document.getElementById('score');
 let lives = 3;
@@ -17,10 +19,10 @@ let maxEnemies = 5;
 // used to start heart and gem timers
 let firstMove = false;
 // only allowed one bonus per play
-let heartReceived = false;
-let gemReceived = false;
-// player in the bug zone? LOL He won't be able to return to the grass.
-let playerInBugZone = false;
+// let player.heartReceived = false;
+// let player.gemReceived = false;
+// // player in the bug zone? LOL He won't be able to return to the grass.
+// let player.playerInBugZone = false;
 initGame();
 
 // Grid is a 7 x 6 grid, with cols 0 and 7 offscreen
@@ -45,65 +47,86 @@ class GameObject {
     audio.play();
   }
 
-  render() {}
-
-  // called by game engine for smooth movement adjusted for deltatime.
-  update() {
+  render() {
+    ctx.drawImage(Resources.get(this.sprite), xHome + (this.x * xOffset), yHome + (this.y * yOffset));
   }
 }
 
-// Draw the enemy on the screen, required method for game
-GameObject.prototype.render = function () {
-  ctx.drawImage(Resources.get(this.sprite), xHome + (this.x * xOffset), yHome + (this.y * yOffset));
-};
-
 class Enemy extends GameObject {
-  constructor(xPos, yPos, speedMultiplier) {
+  constructor() {
     super();
-    this.x = xPos;
-    this.y = yPos;
-    this.speedMultiplier = speedMultiplier;
+    this.x = this.generateRandomEnemyStartX();
+    this.y = this.generateRandomEnemyStartY();
+    this.speedMultiplier =  this.generateRandomEnemySpeed();
     this.images = ['images/enemy-bug.png', 'images/enemy-bug-green.png'];
-    this.sprite =  speedMultiplier > .02 ? this.images[1] : this.images[0];
-    this.defaultSpeed = 0.01;
-    this.sound = './sounds/bite.wav'
+    this.sprite = (this.speedMultiplier > 2) ? this.images[1] : this.images[0];
+    this.sound = './sounds/bite.wav';
   }
 
   // when enemy is recycled set new image based on speed;
   setImage(){
-    this.sprite = this.speedMultiplier > .02 ? this.images[1] : this.images[0];
+    console.log(this.speedMultiplier);
+    this.sprite = (this.speedMultiplier > 2) ? this.images[1] : this.images[0];
   }
 
+  generateRandomEnemyStartX() {
+    // get random row between 2 and 4
+    return Math.floor(Math.random() * - 3);
+  }
+
+  generateRandomEnemyStartY() {
+    // get random row between 2 and 4
+    return Math.floor(Math.random() * 3) + 2;
+  }
+  
+  generateRandomEnemySpeed() {
+    return (Math.random() * 2) + 1;
+  }
 
   // Update the enemy's position, required method for game
   // Parameter: dt, a time delta between ticks
-  update(speed = defaultSpeed) {
+  update(dt) {
     if (gameIsRunning) {
       if (!this.checkForCollision(this)) {
-        this.x += speed + this.speedMultiplier;
+        this.x += dt * this.speedMultiplier;
         if (this.x > 8) {
-          let newLocation = resetEnemy();
-          this.x = newLocation[0];
-          this.y = newLocation[1];
-          this.speedMultiplier = newLocation[2];
+          // reset to new random x, y, speed
+          this.x = this.generateRandomEnemyStartX();
+          this.y = this.generateRandomEnemyStartY();
+          this.speedMultiplier = this.generateRandomEnemySpeed();
           this.setImage();
         }
-      } else {
-        speed = 0;
       }
     }
   }
 
   checkForCollision() {
     // Subtract 0.2 from player x pos. Collisions will occur 20% into grid square to make them more realistic
-    let playerPos = [player.x - 0.4, player.y];
-    if (this.x >= playerPos[0] && this.x < (playerPos[0] + 0.8) && this.y == playerPos[1]) {
+    let playerPos = [player.x - 0.8, player.y];
+    if (this.x >= playerPos[0] && this.x < (playerPos[0] + 1.6) && this.y == playerPos[1]) {
       // collision
-      handlePlayerEnemyCollision();
+      this.handlePlayerEnemyCollision();
       this.playSound();
       return true;
     }
     return false;
+  }
+
+  handlePlayerEnemyCollision() {
+    gameIsRunning = false; // stops updates
+    playerCollision = true;
+    lives--;
+    livesText.innerHTML = lives;
+    hearts = [];
+    gem = [];
+    clearTimeout(heart);
+    clearTimeout(gem);
+    setTimeout(function(){
+      player.reset();
+      allEnemies = [];
+      gameIsRunning = true;
+      playerCollision = false;
+    },2000);
   }
 }
 
@@ -118,6 +141,10 @@ class Player extends GameObject {
     this.minY = 1;
     this.sprite = 'images/char-boy.png';
     this.sound = './sounds/move.wav';
+    this.heartReceived = false;
+    this.gemReceived = false;
+    // player in the bug zone? He won't be able to return to the grass.
+    this.playerInBugZone = false;
   }
 
   reset(){
@@ -142,7 +169,7 @@ class Player extends GameObject {
       gameIsRunning = false;
       score += 10;
       scoreText.innerHTML = score;
-      playerInBugZone = false;
+      player.playerInBugZone = false;
       let self = this;
       setTimeout(function(){
         self.reset();
@@ -158,31 +185,30 @@ class Player extends GameObject {
         case 'up':
           // if first move in game start gem and heart timers if
           // they haven't already got one
-          if(!gemReceived)createHeart();
-          if(!heartReceived) createGem();
+          if(!player.gemReceived)createHeart();
+          if(!player.heartReceived) createGem();
           // comparisons keep player on grid by limiting them to 
           // min/max coords
           // if position is == max position dont move, else move
-          this.y == this.minY ? this.minY : this.y--;
+          this.y = (this.y == this.minY) ? this.minY : --this.y;
           this.playSound();
-          if(this.y <= 4 && !playerInBugZone){
-            playerInBugZone = true;
+          if(this.y <= 4 && !player.playerInBugZone){
+            player.playerInBugZone = true;
           }
           break;
         case 'down':
-          if(playerInBugZone && this.y >= 4) {
+          if(player.playerInBugZone && this.y >= 4) {
             break;
-          } else {           
-            this.y == this.maxY ? this.maxY : this.y++;            
-            this.playSound();
-            break;
-          }
+          }           
+          this.y = (this.y == this.maxY) ? this.maxY : ++this.y;            
+          this.playSound();
+          break;     
         case 'left':
-          this.x == this.minX ? this.minX : this.x--;
+          this.x = (this.x == this.minX) ? this.minX : --this.x;
           this.playSound();
           break;
         case 'right':
-          this.x == this.maxX ? this.maxX : this.x++;
+          this.x = (this.x == this.maxX) ? this.maxX : ++this.x;
           this.playSound();
           break;
         default:
@@ -201,7 +227,7 @@ class Gem extends GameObject {
     this.orange =  'images/gem-orange.png';
     this.green =  'images/gem-green.png';
     this.sprite = this.green;
-    this.sound = './sounds/gem.wav'
+    this.sound = './sounds/gem.wav';
   }
   update() {
     this.checkForCollision();
@@ -211,9 +237,18 @@ class Gem extends GameObject {
     // Subtract 0.2 from player x pos. Collisions will occur 20% into grid square to make them more realistic
     let playerPos = [player.x - 0.4, player.y];
     if (this.x >= playerPos[0] && this.x < (playerPos[0] + 0.8) && this.y == playerPos[1]) {
-      handleGemCollision();
+      this.handleGemCollision();
       this.playSound();
     }
+  }
+
+  handleGemCollision() {
+    score += 30;
+    scoreText.innerHTML = score;
+    // clear gems array
+    gems = [];
+    player.gemReceived = true;
+  
   }
 }
 
@@ -234,17 +269,26 @@ class Heart extends GameObject {
     // Subtract 0.2 from player x pos. Collisions will occur 20% into grid square to make them more realistic
     let playerPos = [player.x - 0.4, player.y];
     if (this.x >= playerPos[0] && this.x < (playerPos[0] + 0.8) && this.y == playerPos[1]) {
-      handleHeartCollision();
+      this.handleHeartCollision();
       this.playSound();
     }
   }
+  
+  handleHeartCollision() {
+    lives++;
+    livesText.innerHTML = lives;
+    // clear hearts array
+    hearts = [];
+    player.heartReceived = true;
+  }
+  
 }
 
 class GameOver extends GameObject {
   constructor() {
     super();
     this.x = 1.5;
-    this.y = 3.5
+    this.y = 3.5;
     this.active = false;
     this.sprite = 'images/gameover.png';
   }
@@ -270,53 +314,19 @@ class GameOver extends GameObject {
 
 // Game Functions -----------------------------------------
 
-function handlePlayerEnemyCollision() {
-  gameIsRunning = false; // stops updates
-  playerCollision = true;
-  lives--;
-  livesText.innerHTML = lives;
-  hearts = [];
-  gem = [];
-  clearTimeout(heart);
-  clearTimeout(gem);
-  setTimeout(function(){
-    player.reset();
-    allEnemies = [];
-    gameIsRunning = true;
-    playerCollision = false;
-  },2000);
-}
+// function generateRandomEnemyStartY() {
+//   // get random row between 2 and 4
+//   return Math.floor(Math.random() * 3) + 2;
+// }
 
-function handleHeartCollision() {
-  lives++;
-  livesText.innerHTML = lives;
-  // clear hearts array
-  hearts = [];
-  heartReceived = true;
-}
-
-function handleGemCollision() {
-  score += 30;
-  scoreText.innerHTML = score;
-  // clear gems array
-  gems = [];
-  gemReceived = true;
-
-}
-
-function generateRandomEnemyStartY() {
-  // get random row between 2 and 4
-  return Math.floor(Math.random() * 3) + 2;
-}
-
-function generateRandomEnemyStartX() {
-  // get random row between 2 and 4
-  return Math.floor(Math.random() * -3);
-}
+// function generateRandomEnemyStartX() {
+//   // get random row between 2 and 4
+//   return Math.floor(Math.random() * -3);
+// }
 // TODO:  add parameter for difficulty
-function generateRandomEnemySpeed() {
-  return Math.random() * .04;
-}
+// function generateRandomEnemySpeed() {
+//   return Math.random() * 0.04;
+// }
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
@@ -334,11 +344,6 @@ document.addEventListener('keyup', function (e) {
   gameOverModal.handleInput(allowedKeys[e.keyCode]);
 });
 
-
-function updateLivesText(){
-
-}
-
 function initGame() {
 
   livesText.innerHTML = lives;
@@ -352,13 +357,13 @@ function gameOver(){
 
 function resetGame(){
   //TODO: reset enemies
-  lives = startingLives;
+  lives = StartingLives;
   // also clear out hearts and gems that didn'y activate
   clearTimeout(heart);
   clearTimeout(gem);
   gemCount = 0;
   heartCount = 0;
-  playerInBugZone = false;
+  player.playerInBugZone = false;
   initGame();
   allEnemies = [];
   gems = [];
@@ -373,16 +378,10 @@ function resetGame(){
 function enemyGenerator() { 
   setInterval(() => {
     if(allEnemies.length < maxEnemies){
-      let enemy = new Enemy(generateRandomEnemyStartX(),generateRandomEnemyStartY(), generateRandomEnemySpeed());
+      let enemy = new Enemy();
       allEnemies.push(enemy);
     }
   }, 1000);
-}
-
-// reset to random row and -x location
-function resetEnemy(){
-  let x = Math.floor(Math.random() * -3);
-  return [x, generateRandomEnemyStartY(), generateRandomEnemySpeed()];
 }
 
 // generate a life heart every 10 seconds
