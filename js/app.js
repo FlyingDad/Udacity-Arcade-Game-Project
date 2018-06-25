@@ -161,12 +161,12 @@ class Player extends GameObject {
       var audio = new Audio('./sounds/win.wav');
       audio.loop = false;
       audio.play();
-      gameIsRunning = false;
-      score += 10;
-      scoreText.innerHTML = score;
+      gameIsRunning = false;     
       player.playerInBugZone = false;
       let self = this;
       setTimeout(function(){
+        score += 10;
+        scoreText.innerHTML = score;
         self.reset();
         gameIsRunning = true;
       }, 1500);
@@ -418,7 +418,3 @@ let hearts = [];
 let player = new Player();
 let gameOverModal = new GameOver();
 enemyGenerator();
-
-  
-
-
